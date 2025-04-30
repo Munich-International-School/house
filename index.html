@@ -3,75 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive House Totals - April 2025</title>
+    <title>Interactive House Totals - April 2025 (Animated & New Colors)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <style>
-        /* 4. Basic Styling */
+        /* Basic Styling */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             padding: 15px;
             line-height: 1.6;
             background-color: #f9f9f9;
             color: #333;
+            overflow-x: hidden;
         }
         h1, h2 {
             text-align: center;
             color: #2c3e50;
         }
-        #chartContainer {
-            max-width: 850px; /* Increased width slightly */
+        #chartContainer, #details {
+            max-width: 850px;
             margin: 25px auto;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            /* Initially hidden for fade-in animation */
+            display: none;
         }
         #details {
-            max-width: 850px;
-            margin: 30px auto;
-            padding: 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            background-color: #ffffff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+             margin-top: 30px;
+             border: 1px solid #e0e0e0;
+             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         #detailContent ul {
             list-style: none;
             padding: 0;
-            max-height: 400px; /* Limit height and add scroll if needed */
-            overflow-y: auto; /* Add scroll for long lists */
-            border-top: 1px solid #eee; /* Separator */
+            max-height: 400px;
+            overflow-y: auto;
+            border-top: 1px solid #eee;
             margin-top: 15px;
+            position: relative;
         }
         #detailContent li {
             padding: 8px 5px;
             border-bottom: 1px dashed #eee;
-            display: flex; /* Use flexbox for alignment */
-            justify-content: space-between; /* Space out name and score */
+            display: flex;
+            justify-content: space-between;
         }
         #detailContent li:last-child {
             border-bottom: none;
         }
         #detailContent strong {
-           /* No fixed width needed with flexbox */
-           margin-right: 10px; /* Add some space */
+           margin-right: 10px;
            color: #555;
         }
         #detailsHeader .color-box {
             display: inline-block;
-            width: 15px; /* Slightly larger */
+            width: 15px;
             height: 15px;
             margin-right: 8px;
             vertical-align: middle;
             border: 1px solid #ccc;
-            border-radius: 3px; /* Rounded corners */
+            border-radius: 3px;
         }
         #detailsPrompt {
             text-align: center;
             color: #777;
             font-style: italic;
         }
-         /* Make canvas responsive */
         canvas {
             max-width: 100%;
             height: auto;
@@ -89,180 +88,146 @@
     <div id="details">
         <h2 id="detailsHeader">Event Details</h2>
         <p id="detailsPrompt">Click on a bar in the chart above to see event scores for that house.</p>
-        <div id="detailContent"></div>
+        <div id="detailContent" style="display: none;"> </div>
     </div>
 
     <script>
-        // 3. JavaScript Logic
+        // Wrap all code in jQuery's document ready function
+        $(document).ready(function() {
 
-        // Data transcribed from the image
-        const houses = ["Enfield", "Griffin", "Pegasus", "Phoenix", "Shenlong", "Sphinx"];
-        const houseData = [
-            { event: "Advisory Games", Enfield: 34, Griffin: 28, Pegasus: 44, Phoenix: 857, Shenlong: 37, Sphinx: 65 },
-            { event: "August Color Day", Enfield: 57, Griffin: 40, Pegasus: 49, Phoenix: 63, Shenlong: 31, Sphinx: 36 },
-            { event: "Trachten Tag Spirit Day", Enfield: 34, Griffin: 23, Pegasus: 25, Phoenix: 33, Shenlong: 22, Sphinx: 25 },
-            { event: "G6 Trash Colllection", Enfield: 0, Griffin: 0, Pegasus: 10, Phoenix: 0, Shenlong: 10, Sphinx: 5 },
-            { event: "Sept/Oct Literacy Challenge", Enfield: 10, Griffin: 10, Pegasus: 10, Phoenix: 10, Shenlong: 10, Sphinx: 0 },
-            { event: "Halloween Spirit Day", Enfield: 48, Griffin: 51, Pegasus: 56, Phoenix: 49, Shenlong: 40, Sphinx: 50 },
-            { event: "Fall Photo Challenge", Enfield: 40, Griffin: 5, Pegasus: 30, Phoenix: 40, Shenlong: 10, Sphinx: 10 },
-            { event: "Odd Socks Day", Enfield: 22, Griffin: 32, Pegasus: 23, Phoenix: 30, Shenlong: 31, Sphinx: 23 },
-            { event: "Chess Tournament", Enfield: 6, Griffin: 2, Pegasus: 4, Phoenix: 2, Shenlong: 5, Sphinx: 18 },
-            { event: "PJ & Onesie Spirit Day", Enfield: 34, Griffin: 33, Pegasus: 29, Phoenix: 29, Shenlong: 28, Sphinx: 32 },
-            { event: "Can Food Drive", Enfield: 38, Griffin: 18, Pegasus: 6, Phoenix: 36, Shenlong: 20, Sphinx: 16 },
-            { event: "Wacky Winter Spirit Day", Enfield: 36, Griffin: 39, Pegasus: 36, Phoenix: 35, Shenlong: 37, Sphinx: 31 },
-            { event: "Paper Snowflake Challenge", Enfield: 20, Griffin: 11, Pegasus: 10, Phoenix: 11, Shenlong: 4, Sphinx: 15 },
-            { event: "Spirit Week - Accessories", Enfield: 30, Griffin: 28, Pegasus: 29, Phoenix: 26, Shenlong: 26, Sphinx: 24 },
-            { event: "Spirit Week - House Colors", Enfield: 46, Griffin: 35, Pegasus: 44, Phoenix: 37, Shenlong: 30, Sphinx: 51 },
-            { event: "Spirit Week - Writing Challenge", Enfield: 12, Griffin: 16, Pegasus: 8, Phoenix: 6, Shenlong: 12, Sphinx: 12 },
-            { event: "Spirit Week - Back to the Future", Enfield: 21, Griffin: 16, Pegasus: 7, Phoenix: 21, Shenlong: 14, Sphinx: 11 },
-            { event: "Spirit Week - Mandala Coloring", Enfield: 14, Griffin: 14, Pegasus: 14, Phoenix: 14, Shenlong: 24, Sphinx: 20 },
-            { event: "Spirit Week - Mixed Patterns", Enfield: 16, Griffin: 21, Pegasus: 24, Phoenix: 20, Shenlong: 23, Sphinx: 19 },
-            { event: "Spirit Week - Twin Day", Enfield: 57, Griffin: 41, Pegasus: 44, Phoenix: 58, Shenlong: 46, Sphinx: 48 },
-            { event: "Hola Hoop Challenge", Enfield: 0, Griffin: 0, Pegasus: 0, Phoenix: 0, Shenlong: 30, Sphinx: 0 },
-            { event: "Pink Day", Enfield: 34, Griffin: 43, Pegasus: 44, Phoenix: 37, Shenlong: 35, Sphinx: 36 },
-            { event: "Fasching", Enfield: 19, Griffin: 35, Pegasus: 28, Phoenix: 23, Shenlong: 22, Sphinx: 22 },
-            { event: "Pi Day", Enfield: 12, Griffin: 27, Pegasus: 5, Phoenix: 37, Shenlong: 11, Sphinx: 20 },
-            { event: "Literacy Month Read-a-Louds", Enfield: 77, Griffin: 49, Pegasus: 74, Phoenix: 72, Shenlong: 54, Sphinx: 55 },
-            { event: "Literacy Month Share a Book", Enfield: 17, Griffin: 12, Pegasus: 7, Phoenix: 11, Shenlong: 10, Sphinx: 10 },
-            { event: "Literacy Month Diorama, Read-a-Th", Enfield: 2, Griffin: 5, Pegasus: 4, Phoenix: 5, Shenlong: 2, Sphinx: 7 }, // Name shortened slightly for display
-            { event: "Waldo/Wally Game", Enfield: 10, Griffin: 9, Pegasus: 13, Phoenix: 15, Shenlong: 16, Sphinx: 16 },
-            // Corrected typo in image data for 'Shenlong' in Character Day
-            { event: "Character Day", Enfield: 21, Griffin: 19, Pegasus: 21, Phoenix: 18, Shenlong: 20, Sphinx: 19 },
-            { event: "Advisory Team Photo Race", Enfield: 20, Griffin: 10, Pegasus: 5, Phoenix: 50, Shenlong: 40, Sphinx: 30 },
-            { event: "Earth Day Trash Race", Enfield: 20, Griffin: 25, Pegasus: 15, Phoenix: 30, Shenlong: 5, Sphinx: 10 }
-        ];
+            // Data (Transcribed from Image)
+            const houses = ["Enfield", "Griffin", "Pegasus", "Phoenix", "Shenlong", "Sphinx"];
+            const houseData = [
+                { event: "Advisory Games", Enfield: 34, Griffin: 28, Pegasus: 44, Phoenix: 857, Shenlong: 37, Sphinx: 65 },
+                { event: "August Color Day", Enfield: 57, Griffin: 40, Pegasus: 49, Phoenix: 63, Shenlong: 31, Sphinx: 36 },
+                { event: "Trachten Tag Spirit Day", Enfield: 34, Griffin: 23, Pegasus: 25, Phoenix: 33, Shenlong: 22, Sphinx: 25 },
+                { event: "G6 Trash Colllection", Enfield: 0, Griffin: 0, Pegasus: 10, Phoenix: 0, Shenlong: 10, Sphinx: 5 },
+                { event: "Sept/Oct Literacy Challenge", Enfield: 10, Griffin: 10, Pegasus: 10, Phoenix: 10, Shenlong: 10, Sphinx: 0 },
+                { event: "Halloween Spirit Day", Enfield: 48, Griffin: 51, Pegasus: 56, Phoenix: 49, Shenlong: 40, Sphinx: 50 },
+                { event: "Fall Photo Challenge", Enfield: 40, Griffin: 5, Pegasus: 30, Phoenix: 40, Shenlong: 10, Sphinx: 10 },
+                { event: "Odd Socks Day", Enfield: 22, Griffin: 32, Pegasus: 23, Phoenix: 30, Shenlong: 31, Sphinx: 23 },
+                { event: "Chess Tournament", Enfield: 6, Griffin: 2, Pegasus: 4, Phoenix: 2, Shenlong: 5, Sphinx: 18 },
+                { event: "PJ & Onesie Spirit Day", Enfield: 34, Griffin: 33, Pegasus: 29, Phoenix: 29, Shenlong: 28, Sphinx: 32 },
+                { event: "Can Food Drive", Enfield: 38, Griffin: 18, Pegasus: 6, Phoenix: 36, Shenlong: 20, Sphinx: 16 },
+                { event: "Wacky Winter Spirit Day", Enfield: 36, Griffin: 39, Pegasus: 36, Phoenix: 35, Shenlong: 37, Sphinx: 31 },
+                { event: "Paper Snowflake Challenge", Enfield: 20, Griffin: 11, Pegasus: 10, Phoenix: 11, Shenlong: 4, Sphinx: 15 },
+                { event: "Spirit Week - Accessories", Enfield: 30, Griffin: 28, Pegasus: 29, Phoenix: 26, Shenlong: 26, Sphinx: 24 },
+                { event: "Spirit Week - House Colors", Enfield: 46, Griffin: 35, Pegasus: 44, Phoenix: 37, Shenlong: 30, Sphinx: 51 },
+                { event: "Spirit Week - Writing Challenge", Enfield: 12, Griffin: 16, Pegasus: 8, Phoenix: 6, Shenlong: 12, Sphinx: 12 },
+                { event: "Spirit Week - Back to the Future", Enfield: 21, Griffin: 16, Pegasus: 7, Phoenix: 21, Shenlong: 14, Sphinx: 11 },
+                { event: "Spirit Week - Mandala Coloring", Enfield: 14, Griffin: 14, Pegasus: 14, Phoenix: 14, Shenlong: 24, Sphinx: 20 },
+                { event: "Spirit Week - Mixed Patterns", Enfield: 16, Griffin: 21, Pegasus: 24, Phoenix: 20, Shenlong: 23, Sphinx: 19 },
+                { event: "Spirit Week - Twin Day", Enfield: 57, Griffin: 41, Pegasus: 44, Phoenix: 58, Shenlong: 46, Sphinx: 48 },
+                { event: "Hola Hoop Challenge", Enfield: 0, Griffin: 0, Pegasus: 0, Phoenix: 0, Shenlong: 30, Sphinx: 0 },
+                { event: "Pink Day", Enfield: 34, Griffin: 43, Pegasus: 44, Phoenix: 37, Shenlong: 35, Sphinx: 36 },
+                { event: "Fasching", Enfield: 19, Griffin: 35, Pegasus: 28, Phoenix: 23, Shenlong: 22, Sphinx: 22 },
+                { event: "Pi Day", Enfield: 12, Griffin: 27, Pegasus: 5, Phoenix: 37, Shenlong: 11, Sphinx: 20 },
+                { event: "Literacy Month Read-a-Louds", Enfield: 77, Griffin: 49, Pegasus: 74, Phoenix: 72, Shenlong: 54, Sphinx: 55 },
+                { event: "Literacy Month Share a Book", Enfield: 17, Griffin: 12, Pegasus: 7, Phoenix: 11, Shenlong: 10, Sphinx: 10 },
+                { event: "Literacy Month Diorama, Read-a-Th", Enfield: 2, Griffin: 5, Pegasus: 4, Phoenix: 5, Shenlong: 2, Sphinx: 7 },
+                { event: "Waldo/Wally Game", Enfield: 10, Griffin: 9, Pegasus: 13, Phoenix: 15, Shenlong: 16, Sphinx: 16 },
+                { event: "Character Day", Enfield: 21, Griffin: 19, Pegasus: 21, Phoenix: 18, Shenlong: 20, Sphinx: 19 },
+                { event: "Advisory Team Photo Race", Enfield: 20, Griffin: 10, Pegasus: 5, Phoenix: 50, Shenlong: 40, Sphinx: 30 },
+                { event: "Earth Day Trash Race", Enfield: 20, Griffin: 25, Pegasus: 15, Phoenix: 30, Shenlong: 5, Sphinx: 10 }
+            ];
+            const houseTotals = { Enfield: 807, Griffin: 697, Pegasus: 718, Phoenix: 857, Shenlong: 705, Sphinx: 736 };
+            const totalScores = houses.map(house => houseTotals[house]);
 
-        // Use the totals provided in the image at the bottom
-        const houseTotals = { Enfield: 807, Griffin: 697, Pegasus: 718, Phoenix: 857, Shenlong: 705, Sphinx: 736 };
-        const totalScores = houses.map(house => houseTotals[house]);
-
-
-
-        // Define distinct colors for houses (NEW MAPPING)
-        // Order: Enfield, Griffin, Pegasus, Phoenix, Shenlong, Sphinx
-        const houseBackgroundColors = [
-            'rgba(46, 204, 113, 0.7)', // Enfield (Green)
-            'rgba(217, 30, 24, 0.7)',  // Griffin (Red)
-            'rgba(52, 152, 219, 0.7)', // Pegasus (Blue)
-            'rgba(243, 156, 18, 0.7)', // Phoenix (Orange)
-            'rgba(142, 68, 173, 0.7)', // Shenlong (Purple)
-            'rgba(241, 196, 15, 0.7)'  // Sphinx (Yellow)
-        ];
-        const houseBorderColors = [
-            'rgba(39, 174, 96, 1)',    // Enfield (Darker Green)
-            'rgba(192, 57, 43, 1)',   // Griffin (Darker Red)
-            'rgba(41, 128, 185, 1)',   // Pegasus (Darker Blue)
-            'rgba(230, 126, 34, 1)',   // Phoenix (Darker Orange)
-            'rgba(155, 89, 182, 1)',   // Shenlong (Darker Purple)
-            'rgba(241, 196, 15, 1)'    // Sphinx (Darker Yellow - same as bg)
-        ];
+            // --- UPDATED Color Definitions ---
+            // Define distinct colors for houses (NEW MAPPING)
+            // Order: Enfield, Griffin, Pegasus, Phoenix, Shenlong, Sphinx
+            const houseBackgroundColors = [
+                'rgba(46, 204, 113, 0.7)', // Enfield (Green)
+                'rgba(217, 30, 24, 0.7)',  // Griffin (Red)
+                'rgba(52, 152, 219, 0.7)', // Pegasus (Blue)
+                'rgba(243, 156, 18, 0.7)', // Phoenix (Orange)
+                'rgba(142, 68, 173, 0.7)', // Shenlong (Purple)
+                'rgba(241, 196, 15, 0.7)'  // Sphinx (Yellow)
+            ];
+            const houseBorderColors = [
+                'rgba(39, 174, 96, 1)',    // Enfield (Darker Green)
+                'rgba(192, 57, 43, 1)',   // Griffin (Darker Red)
+                'rgba(41, 128, 185, 1)',   // Pegasus (Darker Blue)
+                'rgba(230, 126, 34, 1)',   // Phoenix (Darker Orange)
+                'rgba(155, 89, 182, 1)',   // Shenlong (Darker Purple)
+                'rgba(241, 196, 15, 1)'    // Sphinx (Darker Yellow - same as bg)
+            ];
+            // --- END UPDATED Color Definitions ---
 
 
-        // Get the canvas element
-        const ctx = document.getElementById('totalScoresChart').getContext('2d');
+            // --- Initial Fade-In Animation ---
+            $('#chartContainer').fadeIn(800); // Fade in chart container over 800ms
+            $('#details').delay(300).fadeIn(800); // Delay details slightly and fade in
 
-        // Create the main chart
-        const totalScoresChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: houses,
-                datasets: [{
-                    label: 'Total Score', // Used in tooltip, not displayed as legend
-                    data: totalScores,
-                    backgroundColor: houseBackgroundColors,
-                    borderColor: houseBorderColors,
-                    borderWidth: 1.5, // Slightly thicker border
-                    hoverBackgroundColor: houseBorderColors // Use border color on hover
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: true, // Keep aspect ratio, adjust container size
-                indexAxis: 'x', // Display houses on x-axis (standard bar)
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Total Points',
-                            font: { size: 14 }
-                         }
-                    },
-                    x: {
-                         title: {
-                            display: true,
-                            text: 'House',
-                            font: { size: 14 }
+            // Get the canvas element
+            const ctx = document.getElementById('totalScoresChart').getContext('2d');
+
+            // Create the main chart
+            const totalScoresChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: houses,
+                    datasets: [{
+                        label: 'Total Score',
+                        data: totalScores,
+                        backgroundColor: houseBackgroundColors, // Use updated colors
+                        borderColor: houseBorderColors,         // Use updated colors
+                        borderWidth: 1.5,
+                        hoverBackgroundColor: houseBorderColors // Use border color on hover
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: true, indexAxis: 'x',
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Total Points', font: { size: 14 } } }, x: { title: { display: true, text: 'House', font: { size: 14 } } } },
+                    plugins: { legend: { display: false }, title: { display: true, text: 'Total Scores per House', font: { size: 18 }, padding: { top: 10, bottom: 20 } }, tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += context.parsed.y + ' points'; } return label; }, title: function(context) { return context[0].label; } } } },
+                    // --- Interaction ---
+                    onClick: (event, elements) => {
+                        if (elements.length > 0) {
+                            const clickedElementIndex = elements[0].index;
+                            const selectedHouse = houses[clickedElementIndex];
+                            displayDetails(selectedHouse); // Call updated function
+
+                            // --- Smooth Scroll ---
+                            $('html, body').animate({
+                                scrollTop: $("#details").offset().top - 20 // Scroll to details section, -20px offset for padding
+                            }, 500); // Duration 500ms
                         }
                     }
-                },
-                plugins: {
-                    legend: {
-                        display: false // We use axis labels and color coding instead
-                    },
-                    title: {
-                        display: true,
-                        text: 'Total Scores per House',
-                        font: { size: 18 },
-                        padding: { top: 10, bottom: 20 }
-                    },
-                    tooltip: {
-                         callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) { label += ': '; }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y + ' points';
-                                }
-                                return label;
-                            },
-                            title: function(context) {
-                                // Show House name as tooltip title
-                                return context[0].label;
-                            }
-                         }
-                    }
-                },
-                // Interactivity: Handle Clicks
-                onClick: (event, elements) => {
-                    if (elements.length > 0) {
-                        // elements[0] contains information about the clicked bar
-                        const clickedElementIndex = elements[0].index;
-                        const selectedHouse = houses[clickedElementIndex];
-                        displayDetails(selectedHouse); // Call function to show details
-                    }
-                    // Optional: Could add logic here to reset view if clicking outside bars
                 }
-            }
-        });
-
-        // Function to display event details for the selected house
-        function displayDetails(houseName) {
-            const detailsHeader = document.getElementById('detailsHeader');
-            const detailContent = document.getElementById('detailContent');
-            const detailsPrompt = document.getElementById('detailsPrompt');
-
-            // Find the color for the selected house
-            const houseIndex = houses.indexOf(houseName);
-            const selectedHouseColor = houseIndex !== -1 ? houseBackgroundColors[houseIndex] : '#ccc'; // Default color if not found
-
-            // Update the header with house name and a color indicator
-            detailsHeader.innerHTML = `<span class="color-box" style="background-color: ${selectedHouseColor};"></span> Event Scores for ${houseName}`;
-            detailsPrompt.style.display = 'none'; // Hide the initial prompt text
-
-            // Build the list of events and scores for this house
-            let htmlContent = '<ul>';
-            houseData.forEach(item => {
-                // Check if the house name exists as a key in the event item, default to 0 if not
-                const score = item[houseName] !== undefined ? item[houseName] : 0;
-                htmlContent += `<li><span>${item.event}</span> <strong>${score} pts</strong></li>`; // Use span and strong for better structure
             });
-            htmlContent += '</ul>';
 
-            // Update the details section with the generated list
-            detailContent.innerHTML = htmlContent;
-        }
+            // --- Updated function to display details with animation ---
+            function displayDetails(houseName) {
+                const detailsHeader = $('#detailsHeader'); // Use jQuery selector
+                const detailContent = $('#detailContent');
+                const detailsPrompt = $('#detailsPrompt');
 
+                const houseIndex = houses.indexOf(houseName);
+                const selectedHouseColor = houseIndex !== -1 ? houseBackgroundColors[houseIndex] : '#ccc'; // Use updated colors
+
+                // Build the new HTML content
+                let htmlContent = '<ul>';
+                houseData.forEach(item => {
+                    const score = item[houseName] !== undefined ? item[houseName] : 0;
+                    htmlContent += `<li><span>${item.event}</span> <strong>${score} pts</strong></li>`;
+                });
+                htmlContent += '</ul>';
+
+                // --- Animation Sequence ---
+                detailContent.fadeOut(300, function() {
+                    // 1. Update Header (after fadeOut starts)
+                    detailsHeader.html(`<span class="color-box" style="background-color: ${selectedHouseColor};"></span> Event Scores for ${houseName}`);
+                    detailsPrompt.hide(); // Hide the prompt
+
+                    // 2. Update Content (while hidden)
+                    $(this).html(htmlContent); // 'this' refers to detailContent here
+
+                    // 3. Fade In Content
+                    $(this).fadeIn(400);
+                });
+            }
+
+        }); // End of $(document).ready()
     </script>
 
 </body>
