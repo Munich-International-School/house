@@ -136,22 +136,25 @@
         const houseTotals = { Enfield: 807, Griffin: 697, Pegasus: 718, Phoenix: 857, Shenlong: 705, Sphinx: 736 };
         const totalScores = houses.map(house => houseTotals[house]);
 
-        // Define distinct colors for houses
+
+
+        // Define distinct colors for houses (NEW MAPPING)
+        // Order: Enfield, Griffin, Pegasus, Phoenix, Shenlong, Sphinx
         const houseBackgroundColors = [
-            'rgba(217, 30, 24, 0.7)',  // Enfield (Red)
-            'rgba(46, 204, 113, 0.7)', // Griffin (Green)
-            'rgba(142, 68, 173, 0.7)', // Pegasus (Purple)
+            'rgba(46, 204, 113, 0.7)', // Enfield (Green)
+            'rgba(217, 30, 24, 0.7)',  // Griffin (Red)
+            'rgba(52, 152, 219, 0.7)', // Pegasus (Blue)
             'rgba(243, 156, 18, 0.7)', // Phoenix (Orange)
-            'rgba(52, 152, 219, 0.7)', // Shenlong (Blue)
+            'rgba(142, 68, 173, 0.7)', // Shenlong (Purple)
             'rgba(241, 196, 15, 0.7)'  // Sphinx (Yellow)
         ];
         const houseBorderColors = [
-            'rgba(192, 57, 43, 1)',   // Darker Red
-            'rgba(39, 174, 96, 1)',    // Darker Green
-            'rgba(155, 89, 182, 1)',   // Darker Purple
-            'rgba(230, 126, 34, 1)',   // Darker Orange
-            'rgba(41, 128, 185, 1)',   // Darker Blue
-            'rgba(241, 196, 15, 1)'    // Darker Yellow (Same as bg for yellow)
+            'rgba(39, 174, 96, 1)',    // Enfield (Darker Green)
+            'rgba(192, 57, 43, 1)',   // Griffin (Darker Red)
+            'rgba(41, 128, 185, 1)',   // Pegasus (Darker Blue)
+            'rgba(230, 126, 34, 1)',   // Phoenix (Darker Orange)
+            'rgba(155, 89, 182, 1)',   // Shenlong (Darker Purple)
+            'rgba(241, 196, 15, 1)'    // Sphinx (Darker Yellow - same as bg)
         ];
 
 
