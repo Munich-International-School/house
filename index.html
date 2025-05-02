@@ -7,47 +7,20 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <style>
-        /* Basic Styling (mostly unchanged) */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            padding: 0 15px 15px 15px; /* Adjusted padding */
-            line-height: 1.6;
-            background-color: #f9f9f9;
-            color: #333;
-            overflow-x: hidden;
-            margin: 0;
-        }
+        /* Basic Styling */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; padding: 0 15px 15px 15px; line-height: 1.6; background-color: #f9f9f9; color: #333; overflow-x: hidden; margin: 0; }
         h1 { text-align: center; color: #2c3e50; margin-top: 20px; margin-bottom: 10px; }
         h2 { text-align: center; color: #2c3e50; }
 
         /* Controls Area */
-        #controls {
-            text-align: center;
-            padding: 10px 0 20px 0;
-        }
-        button#toggleSignageBtn { /* Renamed ID slightly */
-            padding: 10px 20px;
-            font-size: 1em;
-            cursor: pointer;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        button#toggleSignageBtn:hover {
-            background-color: #2980b9;
-        }
-        button#toggleSignageBtn.active-signage { /* Style for when signage is active */
-             background-color: #e74c3c;
-        }
-         button#toggleSignageBtn.active-signage:hover {
-             background-color: #c0392b;
-         }
-
+        #controls { text-align: center; padding: 10px 0 20px 0; }
+        button#toggleSignageBtn { padding: 10px 20px; font-size: 1em; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 5px; transition: background-color 0.3s ease; }
+        button#toggleSignageBtn:hover { background-color: #2980b9; }
+        button#toggleSignageBtn.active-signage { background-color: #e74c3c; }
+        button#toggleSignageBtn.active-signage:hover { background-color: #c0392b; }
 
         /* Interactive View Styles */
-        #interactiveView { /* Initially visible by default */ }
+        #interactiveView { }
         #chartContainer, #details { max-width: 850px; margin: 25px auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         #details { margin-top: 30px; border: 1px solid #e0e0e0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         #detailContent ul { list-style: none; padding: 0; max-height: 400px; overflow-y: auto; border-top: 1px solid #eee; margin-top: 15px; position: relative; }
@@ -56,56 +29,56 @@
         #detailContent strong { margin-right: 10px; color: #555; }
         #detailsHeader .color-box { display: inline-block; width: 15px; height: 15px; margin-right: 8px; vertical-align: middle; border: 1px solid #ccc; border-radius: 3px; }
         #detailsPrompt { text-align: center; color: #777; font-style: italic; }
-        canvas { max-width: 100%; height: auto; }
+        canvas { max-width: 100%; height: auto; } /* Applies to interactive canvas too */
 
         /* Digital Signage View Styles */
-        #signageMode {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(44, 62, 80, 0.97); color: #ecf0f1;
-            z-index: 1000; display: flex; justify-content: center; align-items: center; flex-direction: column;
-            padding: 30px; box-sizing: border-box; text-align: center;
-        }
-        #signageContent { width: 90%; max-width: 1000px; height: 75%; overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
-        #signageContent > div { width: 100%; }
-        #signageContent h2 { font-size: 3em; color: #e74c3c; margin-bottom: 20px; }
-        #signageContent h3 { font-size: 2.2em; color: #f1c40f; margin-bottom: 15px; }
-        #signageContent h4 { font-size: 1.8em; color: #3498db; margin-bottom: 10px; }
-        #signageContent p, #signageContent li { font-size: 1.5em; line-height: 1.6; margin-bottom: 10px; }
-        #signageContent ul { list-style: none; padding: 0; margin: 0 auto; max-width: 600px; }
+        #signageMode { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(44, 62, 80, 0.97); color: #ecf0f1; z-index: 1000; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 30px; box-sizing: border-box; text-align: center; }
+        #signageContent { width: 90%; max-width: 1000px; height: 80%; /* Increased height slightly for chart */ overflow: hidden; position: relative; display: flex; justify-content: center; align-items: center; }
+        #signageContent > div { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; } /* Ensure inner div fills space */
+        #signageContent h2 { font-size: 2.5em; /* Adjusted size */ color: #e74c3c; margin-bottom: 20px; flex-shrink: 0; /* Prevent shrinking */ }
+        #signageContent h3 { font-size: 2.0em; color: #f1c40f; margin-bottom: 15px; flex-shrink: 0; }
+        #signageContent h4 { font-size: 1.8em; color: #3498db; margin-bottom: 10px; flex-shrink: 0; }
+        #signageContent p { font-size: 1.5em; line-height: 1.6; margin-bottom: 10px; flex-shrink: 0; }
+        #signageContent ul { list-style: none; padding: 0; margin: 0 auto; max-width: 600px; width: 100%; flex-shrink: 0; }
         #signageContent li { background-color: rgba(236, 240, 241, 0.1); padding: 10px 15px; border-radius: 5px; margin-bottom: 8px; display: flex; justify-content: space-between; }
         #signageContent li .house-name { font-weight: bold; }
         #signageContent li .house-score { font-weight: bold; color: #f1c40f; }
         #signageContent .event-score-list li { font-size: 1.2em; padding: 8px 12px;}
+
+        /* Styles for the chart container within signage */
+        #signageChartContainer {
+             width: 100%; /* Take full width of content area */
+             height: 85%; /* Take most of the height */
+             flex-grow: 1; /* Allow it to grow */
+             position: relative; /* Needed for Chart.js responsiveness */
+             padding: 10px; box-sizing: border-box;
+        }
+        #signageChartCanvas { max-height: 100%; max-width: 100%; } /* Ensure canvas fits */
+
         button#closeSignageBtn { position: absolute; top: 20px; right: 20px; background: #c0392b; color: white; border: none; font-size: 1.5em; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; line-height: 40px; text-align: center; z-index: 1001; }
         button#closeSignageBtn:hover { background: #e74c3c; }
 
         /* Utility Class */
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
     <h1>House Competition Totals - April 2025</h1>
-
-    <div id="controls">
-        <button id="toggleSignageBtn">Toggle Signage Mode</button>
-    </div>
+    <div id="controls"><button id="toggleSignageBtn">Toggle Signage Mode</button></div>
 
     <div id="interactiveView">
-        <div id="chartContainer" class="hidden"> <canvas id="totalScoresChart"></canvas>
-        </div>
-        <div id="details" class="hidden"> <h2 id="detailsHeader">Event Details</h2>
-            <p id="detailsPrompt">Click on a bar in the chart above to see event scores for that house.</p>
+        <div id="chartContainer" class="hidden"><canvas id="totalScoresChart"></canvas></div>
+        <div id="details" class="hidden">
+            <h2 id="detailsHeader">Event Details</h2>
+            <p id="detailsPrompt">Click on a bar... </p>
             <div id="detailContent" style="display: none;"></div>
         </div>
     </div>
 
-    <div id="signageMode" class="hidden"> <button id="closeSignageBtn" title="Exit Signage Mode">X</button>
-        <div id="signageContent">
-            <div><h2>Loading Signage...</h2></div>
-        </div>
+    <div id="signageMode" class="hidden">
+        <button id="closeSignageBtn" title="Exit Signage Mode">X</button>
+        <div id="signageContent"><div><h2>Loading Signage...</h2></div></div>
     </div>
 
 
@@ -114,27 +87,27 @@
 
             // --- Data Setup ---
             const houses = ["Enfield", "Griffin", "Pegasus", "Phoenix", "Shenlong", "Sphinx"];
-            const houseData = [ { event: "Advisory Games", Enfield: 34, Griffin: 28, Pegasus: 44, Phoenix: 57, Shenlong: 37, Sphinx: 65 }, { event: "August Color Day", Enfield: 57, Griffin: 40, Pegasus: 49, Phoenix: 63, Shenlong: 31, Sphinx: 36 }, { event: "Trachten Tag Spirit Day", Enfield: 34, Griffin: 23, Pegasus: 25, Phoenix: 33, Shenlong: 22, Sphinx: 25 }, { event: "G6 Trash Colllection", Enfield: 0, Griffin: 0, Pegasus: 10, Phoenix: 0, Shenlong: 10, Sphinx: 5 }, { event: "Sept/Oct Literacy Challenge", Enfield: 10, Griffin: 10, Pegasus: 10, Phoenix: 10, Shenlong: 10, Sphinx: 0 }, { event: "Halloween Spirit Day", Enfield: 48, Griffin: 51, Pegasus: 56, Phoenix: 49, Shenlong: 40, Sphinx: 50 }, { event: "Fall Photo Challenge", Enfield: 40, Griffin: 5, Pegasus: 30, Phoenix: 40, Shenlong: 10, Sphinx: 10 }, { event: "Odd Socks Day", Enfield: 22, Griffin: 32, Pegasus: 23, Phoenix: 30, Shenlong: 31, Sphinx: 23 }, { event: "Chess Tournament", Enfield: 6, Griffin: 2, Pegasus: 4, Phoenix: 2, Shenlong: 5, Sphinx: 18 }, { event: "PJ & Onesie Spirit Day", Enfield: 34, Griffin: 33, Pegasus: 29, Phoenix: 29, Shenlong: 28, Sphinx: 32 }, { event: "Can Food Drive", Enfield: 38, Griffin: 18, Pegasus: 6, Phoenix: 36, Shenlong: 20, Sphinx: 16 }, { event: "Wacky Winter Spirit Day", Enfield: 36, Griffin: 39, Pegasus: 36, Phoenix: 35, Shenlong: 37, Sphinx: 31 }, { event: "Paper Snowflake Challenge", Enfield: 20, Griffin: 11, Pegasus: 10, Phoenix: 11, Shenlong: 4, Sphinx: 15 }, { event: "Spirit Week - Accessories", Enfield: 30, Griffin: 28, Pegasus: 29, Phoenix: 26, Shenlong: 26, Sphinx: 24 }, { event: "Spirit Week - House Colors", Enfield: 46, Griffin: 35, Pegasus: 44, Phoenix: 37, Shenlong: 30, Sphinx: 51 }, { event: "Spirit Week - Writing Challenge", Enfield: 12, Griffin: 16, Pegasus: 8, Phoenix: 6, Shenlong: 12, Sphinx: 12 }, { event: "Spirit Week - Back to the Future", Enfield: 21, Griffin: 16, Pegasus: 7, Phoenix: 21, Shenlong: 14, Sphinx: 11 }, { event: "Spirit Week - Mandala Coloring", Enfield: 14, Griffin: 14, Pegasus: 14, Phoenix: 14, Shenlong: 24, Sphinx: 20 }, { event: "Spirit Week - Mixed Patterns", Enfield: 16, Griffin: 21, Pegasus: 24, Phoenix: 20, Shenlong: 23, Sphinx: 19 }, { event: "Spirit Week - Twin Day", Enfield: 57, Griffin: 41, Pegasus: 44, Phoenix: 58, Shenlong: 46, Sphinx: 48 }, { event: "Hola Hoop Challenge", Enfield: 0, Griffin: 0, Pegasus: 0, Phoenix: 0, Shenlong: 30, Sphinx: 0 }, { event: "Pink Day", Enfield: 34, Griffin: 43, Pegasus: 44, Phoenix: 37, Shenlong: 35, Sphinx: 36 }, { event: "Fasching", Enfield: 19, Griffin: 35, Pegasus: 28, Phoenix: 23, Shenlong: 22, Sphinx: 22 }, { event: "Pi Day", Enfield: 12, Griffin: 27, Pegasus: 5, Phoenix: 37, Shenlong: 11, Sphinx: 20 }, { event: "Literacy Month Read-a-Louds", Enfield: 77, Griffin: 49, Pegasus: 74, Phoenix: 72, Shenlong: 54, Sphinx: 55 }, { event: "Literacy Month Share a Book", Enfield: 17, Griffin: 12, Pegasus: 7, Phoenix: 11, Shenlong: 10, Sphinx: 10 }, { event: "Literacy Month Diorama, Read-a-Th", Enfield: 2, Griffin: 5, Pegasus: 4, Phoenix: 5, Shenlong: 2, Sphinx: 7 }, { event: "Waldo/Wally Game", Enfield: 10, Griffin: 9, Pegasus: 13, Phoenix: 15, Shenlong: 16, Sphinx: 16 }, { event: "Character Day", Enfield: 21, Griffin: 19, Pegasus: 21, Phoenix: 18, Shenlong: 20, Sphinx: 19 }, { event: "Advisory Team Photo Race", Enfield: 20, Griffin: 10, Pegasus: 5, Phoenix: 50, Shenlong: 40, Sphinx: 30 }, { event: "Earth Day Trash Race", Enfield: 20, Griffin: 25, Pegasus: 15, Phoenix: 30, Shenlong: 5, Sphinx: 10 } ];
+            const houseData = [ { event: "Advisory Games", Enfield: 34, Griffin: 28, Pegasus: 44, Phoenix: 857, Shenlong: 37, Sphinx: 65 }, { event: "August Color Day", Enfield: 57, Griffin: 40, Pegasus: 49, Phoenix: 63, Shenlong: 31, Sphinx: 36 }, { event: "Trachten Tag Spirit Day", Enfield: 34, Griffin: 23, Pegasus: 25, Phoenix: 33, Shenlong: 22, Sphinx: 25 }, { event: "G6 Trash Colllection", Enfield: 0, Griffin: 0, Pegasus: 10, Phoenix: 0, Shenlong: 10, Sphinx: 5 }, { event: "Sept/Oct Literacy Challenge", Enfield: 10, Griffin: 10, Pegasus: 10, Phoenix: 10, Shenlong: 10, Sphinx: 0 }, { event: "Halloween Spirit Day", Enfield: 48, Griffin: 51, Pegasus: 56, Phoenix: 49, Shenlong: 40, Sphinx: 50 }, { event: "Fall Photo Challenge", Enfield: 40, Griffin: 5, Pegasus: 30, Phoenix: 40, Shenlong: 10, Sphinx: 10 }, { event: "Odd Socks Day", Enfield: 22, Griffin: 32, Pegasus: 23, Phoenix: 30, Shenlong: 31, Sphinx: 23 }, { event: "Chess Tournament", Enfield: 6, Griffin: 2, Pegasus: 4, Phoenix: 2, Shenlong: 5, Sphinx: 18 }, { event: "PJ & Onesie Spirit Day", Enfield: 34, Griffin: 33, Pegasus: 29, Phoenix: 29, Shenlong: 28, Sphinx: 32 }, { event: "Can Food Drive", Enfield: 38, Griffin: 18, Pegasus: 6, Phoenix: 36, Shenlong: 20, Sphinx: 16 }, { event: "Wacky Winter Spirit Day", Enfield: 36, Griffin: 39, Pegasus: 36, Phoenix: 35, Shenlong: 37, Sphinx: 31 }, { event: "Paper Snowflake Challenge", Enfield: 20, Griffin: 11, Pegasus: 10, Phoenix: 11, Shenlong: 4, Sphinx: 15 }, { event: "Spirit Week - Accessories", Enfield: 30, Griffin: 28, Pegasus: 29, Phoenix: 26, Shenlong: 26, Sphinx: 24 }, { event: "Spirit Week - House Colors", Enfield: 46, Griffin: 35, Pegasus: 44, Phoenix: 37, Shenlong: 30, Sphinx: 51 }, { event: "Spirit Week - Writing Challenge", Enfield: 12, Griffin: 16, Pegasus: 8, Phoenix: 6, Shenlong: 12, Sphinx: 12 }, { event: "Spirit Week - Back to the Future", Enfield: 21, Griffin: 16, Pegasus: 7, Phoenix: 21, Shenlong: 14, Sphinx: 11 }, { event: "Spirit Week - Mandala Coloring", Enfield: 14, Griffin: 14, Pegasus: 14, Phoenix: 14, Shenlong: 24, Sphinx: 20 }, { event: "Spirit Week - Mixed Patterns", Enfield: 16, Griffin: 21, Pegasus: 24, Phoenix: 20, Shenlong: 23, Sphinx: 19 }, { event: "Spirit Week - Twin Day", Enfield: 57, Griffin: 41, Pegasus: 44, Phoenix: 58, Shenlong: 46, Sphinx: 48 }, { event: "Hola Hoop Challenge", Enfield: 0, Griffin: 0, Pegasus: 0, Phoenix: 0, Shenlong: 30, Sphinx: 0 }, { event: "Pink Day", Enfield: 34, Griffin: 43, Pegasus: 44, Phoenix: 37, Shenlong: 35, Sphinx: 36 }, { event: "Fasching", Enfield: 19, Griffin: 35, Pegasus: 28, Phoenix: 23, Shenlong: 22, Sphinx: 22 }, { event: "Pi Day", Enfield: 12, Griffin: 27, Pegasus: 5, Phoenix: 37, Shenlong: 11, Sphinx: 20 }, { event: "Literacy Month Read-a-Louds", Enfield: 77, Griffin: 49, Pegasus: 74, Phoenix: 72, Shenlong: 54, Sphinx: 55 }, { event: "Literacy Month Share a Book", Enfield: 17, Griffin: 12, Pegasus: 7, Phoenix: 11, Shenlong: 10, Sphinx: 10 }, { event: "Literacy Month Diorama, Read-a-Th", Enfield: 2, Griffin: 5, Pegasus: 4, Phoenix: 5, Shenlong: 2, Sphinx: 7 }, { event: "Waldo/Wally Game", Enfield: 10, Griffin: 9, Pegasus: 13, Phoenix: 15, Shenlong: 16, Sphinx: 16 }, { event: "Character Day", Enfield: 21, Griffin: 19, Pegasus: 21, Phoenix: 18, Shenlong: 20, Sphinx: 19 }, { event: "Advisory Team Photo Race", Enfield: 20, Griffin: 10, Pegasus: 5, Phoenix: 50, Shenlong: 40, Sphinx: 30 }, { event: "Earth Day Trash Race", Enfield: 20, Griffin: 25, Pegasus: 15, Phoenix: 30, Shenlong: 5, Sphinx: 10 } ];
             const houseTotals = { Enfield: 807, Griffin: 697, Pegasus: 718, Phoenix: 857, Shenlong: 705, Sphinx: 736 };
             const totalScores = houses.map(house => houseTotals[house]);
             const houseBackgroundColors = [ 'rgba(46, 204, 113, 0.7)', 'rgba(217, 30, 24, 0.7)', 'rgba(52, 152, 219, 0.7)', 'rgba(243, 156, 18, 0.7)', 'rgba(142, 68, 173, 0.7)', 'rgba(241, 196, 15, 0.7)' ];
             const houseBorderColors = [ 'rgba(39, 174, 96, 1)', 'rgba(192, 57, 43, 1)', 'rgba(41, 128, 185, 1)', 'rgba(230, 126, 34, 1)', 'rgba(155, 89, 182, 1)', 'rgba(241, 196, 15, 1)' ];
             const leaderboard = houses.map((house, index) => ({ name: house, score: houseTotals[house], color: houseBackgroundColors[index] })).sort((a, b) => b.score - a.score);
 
-            // --- Chart.js Instance (declared but potentially initialized later) ---
-            let totalScoresChart = null; // Initialize as null
-            const chartCanvas = document.getElementById('totalScoresChart'); // Get canvas element
-            const chartCtx = chartCanvas.getContext('2d');
+            // --- Chart.js Instances ---
+            let interactiveChartInstance = null; // Renamed for clarity
+            let signageChartInstance = null; // Instance for the signage chart slide
+            const interactiveChartCanvas = document.getElementById('totalScoresChart');
+            const interactiveChartCtx = interactiveChartCanvas.getContext('2d');
 
-            function initChart() {
-                 if (totalScoresChart) { // Destroy existing chart if it exists
-                    totalScoresChart.destroy();
-                 }
-                 totalScoresChart = new Chart(chartCtx, {
+            // --- Interactive Chart Functions ---
+            function initInteractiveChart() {
+                 if (interactiveChartInstance) { interactiveChartInstance.destroy(); } // Cleanup existing
+                 interactiveChartInstance = new Chart(interactiveChartCtx, {
                     type: 'bar',
                     data: { labels: houses, datasets: [{ label: 'Total Score', data: totalScores, backgroundColor: houseBackgroundColors, borderColor: houseBorderColors, borderWidth: 1.5, hoverBackgroundColor: houseBorderColors }] },
-                    options: { /* ... chart options ... */
-                         responsive: true, maintainAspectRatio: true, indexAxis: 'x', animation: { duration: 500 }, /* Added short animation */
+                    options: { /* ... options ... */
+                         responsive: true, maintainAspectRatio: true, indexAxis: 'x', animation: { duration: 500 },
                          scales: { y: { beginAtZero: true, title: { display: true, text: 'Total Points', font: { size: 14 } } }, x: { title: { display: true, text: 'House', font: { size: 14 } } } },
                          plugins: { legend: { display: false }, title: { display: true, text: 'Total Scores per House', font: { size: 18 }, padding: { top: 10, bottom: 20 } }, tooltip: { callbacks: { label: function(context) { let label = context.dataset.label || ''; if (label) { label += ': '; } if (context.parsed.y !== null) { label += context.parsed.y + ' points'; } return label; }, title: function(context) { return context[0].label; } } } },
                          onClick: (event, elements) => { if (elements.length > 0) { const clickedElementIndex = elements[0].index; const selectedHouse = houses[clickedElementIndex]; displayDetails(selectedHouse); $('html, body').animate({ scrollTop: $("#details").offset().top - 20 }, 500); } }
@@ -142,105 +115,141 @@
                 });
             }
 
-            function displayDetails(houseName) { /* ... same as before ... */
-                 const detailsHeader = $('#detailsHeader'); const detailContent = $('#detailContent'); const detailsPrompt = $('#detailsPrompt');
-                 const houseIndex = houses.indexOf(houseName); const selectedHouseColor = houseIndex !== -1 ? houseBackgroundColors[houseIndex] : '#ccc';
-                 let htmlContent = '<ul>'; houseData.forEach(item => { const score = item[houseName] !== undefined ? item[houseName] : 0; htmlContent += `<li><span>${item.event}</span> <strong>${score} pts</strong></li>`; }); htmlContent += '</ul>';
-                 detailContent.fadeOut(300, function() { detailsHeader.html(`<span class="color-box" style="background-color: ${selectedHouseColor};"></span> Event Scores for ${houseName}`); detailsPrompt.hide(); $(this).html(htmlContent); $(this).fadeIn(400); });
+            function displayDetails(houseName) { /* ... same ... */
+                const detailsHeader = $('#detailsHeader'); const detailContent = $('#detailContent'); const detailsPrompt = $('#detailsPrompt'); const houseIndex = houses.indexOf(houseName); const selectedHouseColor = houseIndex !== -1 ? houseBackgroundColors[houseIndex] : '#ccc'; let htmlContent = '<ul>'; houseData.forEach(item => { const score = item[houseName] !== undefined ? item[houseName] : 0; htmlContent += `<li><span>${item.event}</span> <strong>${score} pts</strong></li>`; }); htmlContent += '</ul>'; detailContent.fadeOut(300, function() { detailsHeader.html(`<span class="color-box" style="background-color: ${selectedHouseColor};"></span> Event Scores for ${houseName}`); detailsPrompt.hide(); $(this).html(htmlContent); $(this).fadeIn(400); });
             }
+
 
             // --- Digital Signage Variables ---
             let signageInterval = null;
             let currentSignageStage = 0;
-            const signageStageDuration = 7000;
-            const signageStages = [ { type: 'leaderboard', title: "Overall Standings" }, { type: 'focus_house', rank: 1, title: "Current Leader" }, { type: 'focus_house', rank: 2, title: "Runner Up" }, { type: 'event', eventName: "Advisory Games", title: "Event Results: Advisory Games" }, { type: 'event', eventName: "Literacy Month Read-a-Louds", title: "Event Results: Read-a-Louds" } ];
+            const signageStageDuration = 7000; // ms
+            // ADDED 'chart' type to stages
+            const signageStages = [
+                { type: 'leaderboard', title: "Overall Standings" },
+                { type: 'chart', title: "Overall Scores Chart" }, // Added Chart Slide
+                { type: 'focus_house', rank: 1, title: "Current Leader" },
+                { type: 'focus_house', rank: 2, title: "Runner Up" },
+                { type: 'event', eventName: "Advisory Games", title: "Event Results: Advisory Games" },
+                { type: 'event', eventName: "Literacy Month Read-a-Louds", title: "Event Results: Read-a-Louds" }
+            ];
 
-            // --- Signage Content Generation Functions ---
-            function getEventData(eventName) { /* ... same as before ... */
-                 const eventInfo = houseData.find(item => item.event === eventName); if (!eventInfo) return null;
-                 return houses.map((house, index) => ({ name: house, score: eventInfo[house] !== undefined ? eventInfo[house] : 0, color: houseBackgroundColors[index] })).sort((a, b) => b.score - a.score);
+            // --- Signage Content Generation ---
+            function getEventData(eventName) { /* ... same ... */
+                 const eventInfo = houseData.find(item => item.event === eventName); if (!eventInfo) return null; return houses.map((house, index) => ({ name: house, score: eventInfo[house] !== undefined ? eventInfo[house] : 0, color: houseBackgroundColors[index] })).sort((a, b) => b.score - a.score);
+            }
+
+            // --- Signage Update Function (Modified) ---
+            function updateSignageView() {
+                const stage = signageStages[currentSignageStage];
+                let contentHtml = `<div id="signageSlideContent">`; // Wrapper div for content
+
+                // Prepare base HTML structure for the stage type
+                switch (stage.type) {
+                    case 'leaderboard':
+                        contentHtml += `<h2>${stage.title}</h2><ul>`;
+                        leaderboard.forEach((house, index) => { contentHtml += `<li style="border-left: 5px solid ${house.color};"><span class="house-name">${index + 1}. ${house.name}</span> <span class="house-score">${house.score} pts</span></li>`; });
+                        contentHtml += `</ul>`;
+                        break;
+                    case 'focus_house':
+                        const houseToFocus = leaderboard[stage.rank - 1];
+                        contentHtml += `<h2>${stage.title}</h2>`;
+                        if (houseToFocus) { contentHtml += `<h3 style="color: ${houseToFocus.color};">${houseToFocus.name}</h3><p style="font-size: 4em; font-weight: bold; color: ${houseToFocus.color}; margin-top: 10px;">${houseToFocus.score} <span style="font-size: 0.5em; color: #ecf0f1;">Points</span></p>`; }
+                        else { contentHtml += `<p>Data unavailable.</p>`; }
+                        break;
+                    case 'event':
+                        const eventScores = getEventData(stage.eventName);
+                        contentHtml += `<h2>${stage.title}</h2>`;
+                        if (eventScores) { contentHtml += `<ul class="event-score-list">`; eventScores.slice(0, 5).forEach(item => { if (item.score > 0) { contentHtml += `<li style="border-left: 3px solid ${item.color};"><span class="house-name">${item.name}</span> <span class="house-score">${item.score} pts</span></li>`; } }); contentHtml += `</ul>`; }
+                        else { contentHtml += `<p>Event data not found.</p>`; }
+                        break;
+                    case 'chart':
+                        // Add Title and the CANVAS placeholder container
+                        contentHtml += `<h2>${stage.title}</h2>
+                                        <div id="signageChartContainer">
+                                            <canvas id="signageChartCanvas"></canvas>
+                                        </div>`;
+                        break;
+                }
+                contentHtml += `</div>`; // Close wrapper div
+
+                const signageContentDiv = $('#signageContent');
+
+                // Fade out previous content, THEN update HTML, THEN fade in new content
+                signageContentDiv.fadeOut(500, function() {
+                    // --- Cleanup previous stage's resources (IMPORTANTLY: destroy old signage chart) ---
+                    if (signageChartInstance) {
+                        console.log("Destroying previous signage chart instance.");
+                        signageChartInstance.destroy();
+                        signageChartInstance = null;
+                    }
+
+                    // Update the HTML with the new structure
+                    $(this).html(contentHtml);
+
+                    // Fade In the new content
+                    $(this).fadeIn(500, function() {
+                        // --- Initialize NEW resources AFTER fade-in (IMPORTANTLY: create new signage chart) ---
+                        if (stage.type === 'chart') {
+                            const signageCtx = document.getElementById('signageChartCanvas')?.getContext('2d');
+                            if (signageCtx) {
+                                console.log("Initializing signage chart instance.");
+                                // Define options suitable for signage display
+                                const signageChartOptions = {
+                                    responsive: true,
+                                    maintainAspectRatio: false, // Allow chart to fill container height
+                                    scales: {
+                                        y: { beginAtZero: true, ticks: { color: '#ecf0f1', font: { size: 14 } }, grid: { color: 'rgba(236, 240, 241, 0.2)' }, title: { display: true, text: 'Points', color: '#ecf0f1' } },
+                                        x: { ticks: { color: '#ecf0f1', font: { size: 14 } }, grid: { display: false }, title: { display: true, text: 'House', color: '#ecf0f1' } }
+                                    },
+                                    plugins: {
+                                        legend: { display: false }, // Keep legend off for bar chart clarity
+                                        title: { display: false }, // Title is already in the H2
+                                        tooltip: { enabled: false } // Disable tooltips for signage
+                                    },
+                                    animation: { duration: 600 }
+                                };
+                                // Create the new chart instance for the signage slide
+                                signageChartInstance = new Chart(signageCtx, {
+                                    type: 'bar',
+                                    data: { labels: houses, datasets: [{ label: 'Total Score', data: totalScores, backgroundColor: houseBackgroundColors, borderColor: houseBorderColors, borderWidth: 1 }] },
+                                    options: signageChartOptions
+                                });
+                            } else { console.error("Signage chart canvas context not found after fade-in."); }
+                        }
+                    });
+                });
+
+                // Move to the next stage for the *next* interval cycle
+                currentSignageStage = (currentSignageStage + 1) % signageStages.length;
+            } // End of updateSignageView
+
+
+            function startSignageCycle() { /* ... same ... */
+                 if (signageInterval) clearInterval(signageInterval); console.log("Starting signage cycle"); currentSignageStage = 0; updateSignageView(); signageInterval = setInterval(updateSignageView, signageStageDuration);
+             }
+            function stopSignageCycle() { /* ... same ... */
+                 console.log("Stopping signage cycle"); clearInterval(signageInterval); signageInterval = null;
+                 // Also destroy any active signage chart when stopping cycle
+                 if (signageChartInstance) { console.log("Destroying signage chart instance on stop."); signageChartInstance.destroy(); signageChartInstance = null; }
              }
 
-            function updateSignageView() { /* ... same as before ... */
-                 const stage = signageStages[currentSignageStage]; let contentHtml = `<div>`;
-                 switch (stage.type) {
-                     case 'leaderboard': contentHtml += `<h2>${stage.title}</h2><ul>`; leaderboard.forEach((house, index) => { contentHtml += `<li style="border-left: 5px solid ${house.color};"><span class="house-name">${index + 1}. ${house.name}</span> <span class="house-score">${house.score} pts</span></li>`; }); contentHtml += `</ul>`; break;
-                     case 'focus_house': const houseToFocus = leaderboard[stage.rank - 1]; if (houseToFocus) { contentHtml += `<h2>${stage.title}</h2><h3 style="color: ${houseToFocus.color};">${houseToFocus.name}</h3><p style="font-size: 4em; font-weight: bold; color: ${houseToFocus.color}; margin-top: 10px;">${houseToFocus.score} <span style="font-size: 0.5em; color: #ecf0f1;">Points</span></p>`; } else { contentHtml += `<h2>${stage.title}</h2><p>Data unavailable.</p>`; } break;
-                     case 'event': const eventScores = getEventData(stage.eventName); contentHtml += `<h2>${stage.title}</h2>`; if (eventScores) { contentHtml += `<ul class="event-score-list">`; eventScores.slice(0, 5).forEach(item => { if (item.score > 0) { contentHtml += `<li style="border-left: 3px solid ${item.color};"><span class="house-name">${item.name}</span> <span class="house-score">${item.score} pts</span></li>`; } }); contentHtml += `</ul>`; } else { contentHtml += `<p>Event data not found.</p>`; } break;
-                 }
-                 contentHtml += `</div>`;
-                 const signageContentDiv = $('#signageContent'); signageContentDiv.fadeOut(500, function() { $(this).html(contentHtml).fadeIn(500); });
-                 currentSignageStage = (currentSignageStage + 1) % signageStages.length;
-            }
-
-            function startSignageCycle() {
-                 if (signageInterval) clearInterval(signageInterval);
-                 console.log("Starting signage cycle");
-                 currentSignageStage = 0;
-                 updateSignageView(); // Show first stage immediately
-                 signageInterval = setInterval(updateSignageView, signageStageDuration);
-            }
-
-            function stopSignageCycle() {
-                 console.log("Stopping signage cycle");
-                 clearInterval(signageInterval);
-                 signageInterval = null;
-            }
-
             // --- Mode Activation/Deactivation ---
-            function activateSignageMode() {
-                console.log("Activating Signage Mode");
-                $('#interactiveView').addClass('hidden');
-                $('#signageMode').removeClass('hidden').css('display', 'flex');
-                $('#toggleSignageBtn').text('Show Interactive View').addClass('active-signage');
-                startSignageCycle();
+            function activateSignageMode() { /* ... same ... */
+                 console.log("Activating Signage Mode"); $('#interactiveView').addClass('hidden'); $('#signageMode').removeClass('hidden').css('display', 'flex'); $('#toggleSignageBtn').text('Show Interactive View').addClass('active-signage'); startSignageCycle();
+             }
+            function deactivateSignageMode() { /* ... same ... */
+                 console.log("Deactivating Signage Mode"); stopSignageCycle(); $('#signageMode').addClass('hidden'); $('#interactiveView').removeClass('hidden'); $('#chartContainer').removeClass('hidden').fadeIn(400); $('#details').removeClass('hidden').fadeIn(400); initInteractiveChart(); $('#detailsPrompt').show(); $('#detailContent').hide(); $('#detailsHeader').text('Event Details'); $('#toggleSignageBtn').text('Show Digital Signage').removeClass('active-signage');
             }
 
-            function deactivateSignageMode() {
-                console.log("Deactivating Signage Mode");
-                stopSignageCycle();
-                $('#signageMode').addClass('hidden');
-                $('#interactiveView').removeClass('hidden');
-                // Ensure interactive elements are visible and chart is ready
-                $('#chartContainer').removeClass('hidden').fadeIn(400);
-                $('#details').removeClass('hidden').fadeIn(400);
-                initChart(); // Initialize or re-initialize chart
-                // Reset details view
-                $('#detailsPrompt').show();
-                $('#detailContent').hide();
-                $('#detailsHeader').text('Event Details');
-                $('#toggleSignageBtn').text('Show Digital Signage').removeClass('active-signage');
-            }
-
-            // --- Hash Handling ---
-            function handleHashChange() {
-                if (window.location.hash === '#signage') {
-                    activateSignageMode();
-                } else {
-                    deactivateSignageMode();
-                }
-            }
-
-            // --- Event Listeners ---
-            // Toggle button click changes the hash
-            $('#toggleSignageBtn').on('click', function() {
-                if (window.location.hash === '#signage') {
-                    window.location.hash = ''; // Go to interactive mode
-                } else {
-                    window.location.hash = 'signage'; // Go to signage mode
-                }
-            });
-
-            // Close button (in signage) click clears the hash
-            $('#closeSignageBtn').on('click', function() {
-                window.location.hash = ''; // Go to interactive mode
-            });
-
-            // Listen for hash changes (including back/forward buttons)
+            // --- Hash Handling & Listeners ---
+            function handleHashChange() { if (window.location.hash === '#signage') { activateSignageMode(); } else { deactivateSignageMode(); } }
+            $('#toggleSignageBtn').on('click', function() { if (window.location.hash === '#signage') { window.location.hash = ''; } else { window.location.hash = 'signage'; } });
+            $('#closeSignageBtn').on('click', function() { window.location.hash = ''; });
             $(window).on('hashchange', handleHashChange);
 
             // --- Initial Load ---
-            handleHashChange(); // Check hash on initial load to set the correct mode
+            handleHashChange(); // Set initial state based on hash
 
         }); // End of $(document).ready()
     </script>
